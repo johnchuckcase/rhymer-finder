@@ -35,6 +35,9 @@ user_agents = ["Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6)",
                 'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A']
 
+proxies = [("108.59.10.129","55555"),
+            ("84.23.107.195","8080")]
+
 artists = ['dmx','toohort','pablo','masterp','50cent','drake','bone','saltnpepa',\
            'juvenile','youngjeezy','wizkhalifa','lilb','lilwayne','guccimane','missy',\
            'west','rundmc','ugk','snoopdogg','jadakiss','scarface','icp','nickiminaj',\
@@ -47,90 +50,113 @@ artists = ['dmx','toohort','pablo','masterp','50cent','drake','bone','saltnpepa'
           'redman','ghostface','roots','wutang','rza','canibus','gza','aesoprock',\
           'jcole','kendricklamar']
 
-with open('scrap_log','w') as f:
+#Save the urls for the songs by all artists into one file
+# for artist in artists:
+#
+#     print "Getting URLS for", artist
+#     artist_dir = project_dir + '/data/html/' + artist
+#
+#     #Gather all song links for particular artist
+#     if not os.path.exists(artist_dir):
+#         os.makedirs(artist_dir)
+#
+#     #50-cent's url is lyrics/19/50-cent for some reason
+#     if artist[0].isdigit():
+#         url = 'http://www.azlyrics.com/19/' + artist + '.html'
+#     else:
+#         url = 'http://www.azlyrics.com/' + artist[0] + '/' + artist + '.html'
+#
+#     #Get the url for every song by artist
+#     headers = {"User-Agent":np.random.choice(user_agents)}
+#     req = requests.get(url, headers=headers)
+#
+#     #Save raw html to file
+#     with open(artist_dir + '/url_page.html','w') as home_f:
+#         home_f.write(req.content.decode('utf-8').encode('ascii', 'ignore'))
+#
+#     #Feed the html to a BeatifulSoup object
+#     soup = BeautifulSoup(req.content,'lxml')
+#
+#     #Parse out the song url tags
+#     els = soup.find(id='listAlbum')
+#
+#     #Do not include song lyrics from "non-rap" songs or repeats (e.g., remixes)
+#     stop_strings = ['intro','skit','interlude','remix']
+#
+#     #Parse out urls for artist
+#     urls = [x['href'][2:] for x in els.find_all(target='_blank') if not any(substr in x.contents[0].lower() for substr in stop_strings)]
+#
+#     #Append urls to list of urls for all artists
+#     with open(project_dir + '/data/html/urls.txt','a') as urls_f:
+#         for url in urls:
+#             urls_f.write("%s\n" % url)
+#
+#     time.sleep(np.random.randint(10,20))
 
-    for artist in artists:
+#Get the list of already scraped urls
+if os.path.exists(project_dir + '/data/html/already_scraped_urls.txt'):
+    with open(project_dir + '/data/html/already_scraped_urls.txt','r') as urls_f:
+        already_scraped = [url.strip() for url in urls_f]
+else:
+    already_scraped = []
 
+#Get the list of total urls and exclude any that have already been scraped
+with open(project_dir + '/data/html/urls.txt','r') as urls_f:
+    urls = [url.strip() for url in urls_f if url[:7] == '/lyrics' and not url in already_scraped]
+
+#Randomize URLS for more covert scraping
+np.random.shuffle(urls)
+
+#Loop over all songs for artist
+for i, url in enumerate(urls):
+    try:
+        print i, url
+
+        # try:
+        # Go to the link and get the html as a string
+        headers = {"User-Agent":np.random.choice(user_agents)}
+        req = requests.get('http://www.azlyrics.com/' + url, headers=headers)
+
+        # Feed the html to a BeatifulSoup object
+        soup = BeautifulSoup(req.content, 'lxml')
+
+        #Lyrics from Webpage
+        rows = soup.find('div',{'class':'col-xs-12 col-lg-8 text-center'})
+        rows = rows.find('div',{'class':''})
+        lyrics = rows.text
+
+        #Strip trailing whitespaces and unicode madness
+        lyrics = lyrics.strip().encode('ascii','ignore')
+
+        #Get year / album from bottom of page
+        if soup.find('div',{'class':'panel album-panel noprint'}):
+            year_album = str(soup.find('div',{'class':'panel album-panel noprint'}).text.strip())
+            album = year_album.split('"')[1]
+            year = year_album.split('"')[2].strip().translate(None,'()')
+        else:
+            album = ''
+            year = ''
+
+        #Get Song and Artist Name from URL
+        song = re.split('\.|/',url)[-2]
+        artist = url.split('/')[2]
         artist_dir = project_dir + '/data/html/' + artist
 
-        #Gather all song links for particular artist
-        if not os.path.exists(artist_dir):
-            os.makedirs(artist_dir)
-
-        #50-cent's url is lyrics/19/50-cent for some reason
-        if artist[0].isdigit():
-            url = 'http://www.azlyrics.com/19/' + artist + '.html'
-        else:
-            url = 'http://www.azlyrics.com/' + artist[0] + '/' + artist + '.html'
-
-        #Get the url for every song by artist
-        content = urlopen(url).read()
+        #Add lyrics and meta-info to database
+        tab.insert_one({'artist':artist, 'url':url, 'lyrics':lyrics, 'song':song, 'album':album, 'year':year})
 
         #Save raw html to file
-        with open(artist_dir + '/url_page.html','w') as home_f:
-            home_f.write(content.decode('utf-8').encode('ascii', 'ignore'))
+        with open(artist_dir + '/' + song + '.html','w') as home_f:
+            home_f.write(req.content.decode('utf-8').encode('ascii', 'ignore'))
 
-        #Feed the html to a BeatifulSoup object
-        soup = BeautifulSoup(content,'lxml')
+        #Note that the url has been scraped
+        with open(project_dir + '/data/html/urls_already_scraped.txt','a') as urls_f:
+            urls_f.write("%s\n" % url)
 
-        #Parse out the song url tags
-        els = soup.find(id='listAlbum')
+        #Sleep a random amount of time between requests. Every 5, sleep more.
+        time.sleep(np.random.randint(20,30) + np.random.rand())
+        if i % 5 == 0:
+            time.sleep(np.random.randint(20,30) + np.random.rand())
 
-        #Do not include song lyrics from "non-rap" songs or repeats (e.g., remixes)
-        stop_strings = ['intro','skit','interlude','remix']
-
-        #Parse out urls for artist
-        urls = [x['href'][2:] for x in els.find_all(target='_blank') if not any(substr in x.contents[0].lower() for substr in stop_strings)]
-
-        time.sleep(np.random.randint(10,20))
-
-        #Loop over all songs for artist
-        for i, url in enumerate(urls):
-
-            print i, url
-
-            try:
-                # Go to the link and get the html as a string
-                headers = {"User-Agent":"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6)"}
-                r = requests.get('http://www.azlyrics.com/' + url, headers=headers)
-
-                # Feed the html to a BeatifulSoup object
-                soup = BeautifulSoup(r.content, 'lxml')
-
-                #Lyrics from Webpage
-                rows = soup.find('div',{'class':'col-xs-12 col-lg-8 text-center'})
-                rows = rows.find('div',{'class':''})
-                lyrics = rows.text
-
-                #Strip trailing whitespaces and unicode madness
-                lyrics = lyrics.strip().encode('ascii','ignore')
-
-                #Get year / album
-                year_album = str(soup.find('div',{'class':'panel album-panel noprint'}).text.strip())
-                album = year_album.split('"')[1]
-                year = year_album.split('"')[2].strip().translate(None,'()')
-
-                #Get Song Name
-                song = re.split('\.|/',url)[-2]
-
-                #Add lyrics and meta-info to database
-                tab.insert_one({'artist':artist, 'url':url, 'lyrics':lyrics, 'song':song, 'album':album, 'year':year})
-
-                #Log Lyric Download
-                f.write(artist + ' - ' + song)
-
-                #Save raw html to file
-                with open(artist_dir + '/' + song + '.html','w') as home_f:
-                    home_f.write(r.content.decode('utf-8').encode('ascii', 'ignore'))
-
-                #Sleep a random amount of time between requests. Every 5, sleep more.
-                time.sleep(np.random.randint(10,20) + np.random.rand())
-                if i % 5 == 0:
-                    time.sleep(np.random.randint(10,20) + np.random.rand())
-
-            except:
-                print("Error: " + artist + " - " + song)
-                f.write("Error: " + artist + " - " + song)
-        # except:
-        #     print("Error artist song scrape: " + artist)
-        #     f.write("Error artist song scrape: " + artist)
+    except:
+        print("Error: " + artist + " - " + song)
