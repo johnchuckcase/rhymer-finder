@@ -1,23 +1,21 @@
-# Import library to read urls
-from urllib2 import urlopen
+#Scrape song lyrics for each url in "url.txt" (created in scrape_artist.py)
+
 import requests
-# Import library to parse html
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import os
-import re
 import pandas as pd
 import numpy as np
 import re
 import time
-
-project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 client = MongoClient()
 # Access/Initiate Database
 db = client['rap_db']
 # Access/Initiate Table
 tab = db['lyrics']
+
+project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 #Users to randomly cycle through for each request
 user_agents = ["Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6)",
@@ -35,8 +33,6 @@ user_agents = ["Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6)",
                 'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A']
 
-proxies = [("108.59.10.129","55555"),
-            ("84.23.107.195","8080")]
 
 artists = ['dmx','toohort','pablo','masterp','50cent','drake','bone','saltnpepa',\
            'juvenile','youngjeezy','wizkhalifa','lilb','lilwayne','guccimane','missy',\
@@ -49,49 +45,6 @@ artists = ['dmx','toohort','pablo','masterp','50cent','drake','bone','saltnpepa'
           'common','raekwon','xzibit','beastie','nas','outkast','e40','blackalicious',\
           'redman','ghostface','roots','wutang','rza','canibus','gza','aesoprock',\
           'jcole','kendricklamar']
-
-#Save the urls for the songs by all artists into one file
-# for artist in artists:
-#
-#     print "Getting URLS for", artist
-#     artist_dir = project_dir + '/data/html/' + artist
-#
-#     #Gather all song links for particular artist
-#     if not os.path.exists(artist_dir):
-#         os.makedirs(artist_dir)
-#
-#     #50-cent's url is lyrics/19/50-cent for some reason
-#     if artist[0].isdigit():
-#         url = 'http://www.azlyrics.com/19/' + artist + '.html'
-#     else:
-#         url = 'http://www.azlyrics.com/' + artist[0] + '/' + artist + '.html'
-#
-#     #Get the url for every song by artist
-#     headers = {"User-Agent":np.random.choice(user_agents)}
-#     req = requests.get(url, headers=headers)
-#
-#     #Save raw html to file
-#     with open(artist_dir + '/url_page.html','w') as home_f:
-#         home_f.write(req.content.decode('utf-8').encode('ascii', 'ignore'))
-#
-#     #Feed the html to a BeatifulSoup object
-#     soup = BeautifulSoup(req.content,'lxml')
-#
-#     #Parse out the song url tags
-#     els = soup.find(id='listAlbum')
-#
-#     #Do not include song lyrics from "non-rap" songs or repeats (e.g., remixes)
-#     stop_strings = ['intro','skit','interlude','remix']
-#
-#     #Parse out urls for artist
-#     urls = [x['href'][2:] for x in els.find_all(target='_blank') if not any(substr in x.contents[0].lower() for substr in stop_strings)]
-#
-#     #Append urls to list of urls for all artists
-#     with open(project_dir + '/data/html/urls.txt','a') as urls_f:
-#         for url in urls:
-#             urls_f.write("%s\n" % url)
-#
-#     time.sleep(np.random.randint(10,20))
 
 #Get the list of already scraped urls
 if os.path.exists(project_dir + '/data/html/already_scraped_urls.txt'):
@@ -112,7 +65,6 @@ for i, url in enumerate(urls):
     try:
         print i, url
 
-        # try:
         # Go to the link and get the html as a string
         headers = {"User-Agent":np.random.choice(user_agents)}
         req = requests.get('http://www.azlyrics.com/' + url, headers=headers)
