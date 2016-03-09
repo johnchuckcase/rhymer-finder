@@ -39,7 +39,6 @@ def lyrics2words(lyrics):
     return preprocess_lyrics(lyrics).split()
 
 def hasVowels(word):
-    print word
     for pronounce in arpabet[word]:
         if any(map(lambda phone: phone[:2] in vowels,pronounce)):
             return True
@@ -83,21 +82,20 @@ def create_rhyme_dict(artist = None):
     word_list = map(lambda lyrics: lyrics2words(lyrics),corpus)
     words = set([word for song in word_list for word in song]) #flatten list of list
 
-    rhyme_dict = defaultdict(list)
-    for vowel in vowels:
-        for word in set(words):
-            # if any of the possible pronounications rhyme with word
-            if word in arpabet and \
-                any(map(lambda phones: \
-                any(map(lambda phone: vowel in phone, phones)), arpabet[word])):
+    rhyme_dict = defaultdict(set)
+    for word in words:
+        # if known word and >= pronounciation has a vowel
+        if word in arpabet and hasVowels(word):
 
-                #loop over all possible pronounications of word
-                for phones in arpabet[word]:
-                    #if word has vowels
-                    if hasVowels(phones):
-                        #find the final vowel sound in the word
-                        vowel_ind = np.where(map(lambda phone: phone[:2] in vowels,phones))[0][-1]
+            #loop over all possible pronounications of word
+            for phones in arpabet[word]:
 
-                        if not word in rhyme_dict[tuple(phones[vowel_ind:])]:
-                            rhyme_dict[tuple(phones[vowel_ind:])].append(word)
+                #If this pronounciation has a vowel
+                if any(map(lambda phon: phon[:2] in vowels,phones)):
+
+                    #find the final vowel sound in the word
+                    vowel_ind = np.where(map(lambda phone: phone[:2] in vowels,phones))[0][-1]
+
+                    #Append word to rhyming dictionary
+                    rhyme_dict[tuple(phones[vowel_ind:])].update([word])
     return rhyme_dict

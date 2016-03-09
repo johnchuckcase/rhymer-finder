@@ -4,6 +4,7 @@ import numpy as np
 import re
 import nltk
 import string
+import random
 import lyrics_preprocessing as lp
 
 
@@ -35,7 +36,7 @@ for lyrics in corpus:
 rhyme_dict = lp.create_rhyme_dict()
 
 scores = []
-for i in range(10):
+for i in range(100):
     #Predict new word
     hits = 0
     trys = 0
@@ -45,7 +46,6 @@ for i in range(10):
         test_x = couplet[0].split()[-1]
         test_y = couplet[1].split()[-1]
 
-        print couplet
         #If unknown word or vowel-less
         if not test_x in lp.arpabet or not lp.hasVowels(test_x):
             continue
@@ -60,12 +60,13 @@ for i in range(10):
         #Create list of possible rhymes based on rhyming_dictionary
         poss_targets = rhyme_dict[tuple(phones_to_rhyme)]
 
-        yhat = np.random.choice(poss_targets)
+        #Choose a random word from possible rhymes
+        yhat = random.sample(poss_targets,1)[0]
         trys += 1
 
         if yhat == test_y:
             hits += 1
     #compute accuracy and append to list
     scores.append(hits / float(len(test_data)))
-print np.mean(scores) #0.0078352 accuracy
+print np.mean(scores) #0.0065038 accuracy
 print np.std(scores)
