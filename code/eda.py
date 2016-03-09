@@ -5,7 +5,7 @@ import re
 import nltk
 import string
 from num2words import num2words
-from lyrics_preprocessing import lyrics2words
+from lyrics_preprocessing as lp
 from collections import defaultdict
 
 # Access Database and Table
@@ -17,7 +17,7 @@ tab = db['lyrics']
 corpus = list(set([song['lyrics'] for song in tab.find()]))
 
 #Preprocess lyrics and return list of words
-word_list = map(lambda lyrics: lyrics2words(lyrics),corpus)
+word_list = map(lambda lyrics: lp.lyrics2words(lyrics),corpus)
 words = set([word for song in word_list for word in song]) #flatten list of list
 
 #Get pronouncation dictionary

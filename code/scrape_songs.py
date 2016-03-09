@@ -15,6 +15,7 @@ db = client['rap_db']
 # Access/Initiate Table
 tab = db['lyrics']
 
+#Find parent directory of this script
 project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 #Users to randomly cycle through for each request
@@ -24,15 +25,12 @@ user_agents = ["Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6)",
                 "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)",
             	"Opera/9.00 (Windows NT 5.1; U; en)"
                 "Mozilla/5.0 (Linux; U; Android 0.5; en-us) AppleWebKit/522+ (KHTML, like Gecko) Safari/419.3",
-                "Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3",
-                "Mozilla/5.0 (BlackBerry; U; BlackBerry 9800; en) AppleWebKit/534.1+ (KHTML, Like Gecko) Version/6.0.0.141 Mobile Safari/534.1+",
                 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0',
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586',
                 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko',
                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
                 'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A']
-
 
 artists = ['dmx','toohort','pablo','masterp','50cent','drake','bone','saltnpepa',\
            'juvenile','youngjeezy','wizkhalifa','lilb','lilwayne','guccimane','missy',\
