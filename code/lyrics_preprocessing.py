@@ -25,25 +25,40 @@ def spell_out_num(st):
     else:
         return st #Deal with 'one thousand, nine hundred and ninety-nine' cases later
 
-def lyrics2words(lyrics):
-    lyrics = re.sub('\[.*\]',' ',lyrics) #Get rid of block titles (e.g., [Verse 1], [Chorus])
+#Called by lyrics2words and lyrics2lines
+def preprocess_lyrics(lyrics):
+    lyrics = re.sub('\[.*\]','',lyrics) #Get rid of block titles (e.g., [Verse 1], [Chorus])
     lyrics = re.sub('\(|\)','',lyrics)   #Get rid of words in parentheses
     lyrics = re.sub('[0-9]+',spell_out_num,lyrics) #Spell out numbers
+    lyrics = lyrics.translate(dict.fromkeys(map(ord, string.punctuation))) #unicode translate out punctuation
     lyrics = re.sub('[A-Z]{2,}',lambda x: ' '.join(x.group(0)),lyrics) #Space out acronoyms
     lyrics = lyrics.lower()
-    lyrics = lyrics.translate(dict.fromkeys(map(ord, string.punctuation))) #unicode translate out punctuation
-    return lyrics.split()
+    return lyrics
+
+def lyrics2words(lyrics):
+    return preprocess_lyrics(lyrics).split()
+
+#Return list of lists: each line has a list of its words
+def lyrics2lines(lyrics):
+    lines = re.split('\n+',preprocess_lyrics(lyrics).replace('\r','').strip())
+    return [line.split() for line in lines]
 
 def doTheyRhyme(word1,word2):
     try:
         phones1, phones2 = arpabet[word1], arpabet[word2]
+        #if neither word have a vowel
+        if (len(phones1) == 1 and not phones1[0][0] in vowels) or (len(phones2) == 1 and not phones2[0][0] in vowels):
+            assert(0)
+    except AssertionError:
+        return False
     except:
         return False
     #They rhyme if the last vowel phoneme and all subsequent phonemes match
     for phone1 in phones1:
         for phone2 in phones2:
-            vowel_ind1 = np.where(map(lambda phone: phone[:2] in vowels,phone1))[0][-1]
-            vowel_ind2 = np.where(map(lambda phone: phone[:2] in vowels,phone2))[0][-1]
+            #In the list of phonemes for each word, find the last vowel sound. phone[:2] excludes stress from consideration
+            vowel_ind1 = np.where(map(lambda phone: phone[:2] in vowels if len(phone)>1 else phone[0],phone1))[0][-1]
+            vowel_ind2 = np.where(map(lambda phone: phone[:2] in vowels if len(phone)>1 else phone[0],phone2))[0][-1]
             if phone1[vowel_ind1:] == phone2[vowel_ind2:]:
                 return True
     return False

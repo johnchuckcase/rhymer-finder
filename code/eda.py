@@ -4,9 +4,8 @@ import numpy as np
 import re
 import nltk
 import string
-from num2words import num2words
-from lyrics_preprocessing as lp
-from collections import defaultdict
+import lyrics_preprocessing as lp
+
 
 # Access Database and Table
 client = MongoClient()
@@ -16,29 +15,46 @@ tab = db['lyrics']
 #Retrieve all lyrics
 corpus = list(set([song['lyrics'] for song in tab.find()]))
 
-#Preprocess lyrics and return list of words
-word_list = map(lambda lyrics: lp.lyrics2words(lyrics),corpus)
-words = set([word for song in word_list for word in song]) #flatten list of list
+test_data = []
 
-#Get pronouncation dictionary
-arpabet = nltk.corpus.cmudict.dict()
+#Loop over every song
+for lyrics in corpus:
+    lyrics = lp.lyrics2lines(lyrics)
 
-vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
+    for i in range(len(lyrics)-1):
+        if not lyrics[i] or not lyrics[i+1]:
+            continue
+        word1 = lyrics[i][-1]
+        word2 = lyrics[i+1][-1]
 
-rhyme_dict = defaultdict(list)
-for vowel in vowels:
-    for word in set(words):
-        # if any of the possible pronounications rhyme with word
-        if word in arpabet and \
-            any(map(lambda phones: \
-            any(map(lambda phone: vowel in phone, phones)), arpabet[word])):
+        #do the last words of this line and next line rhyme?
+        if lp.doTheyRhyme(word1, word2) and not word1 == word2:
+            test_data.append([' '.join(lyrics[i]),' '.join(lyrics[i+1])])
 
-            #loop over all possible pronounications of word
-            for phones in arpabet[word]:
-                #if word has vowels
-                if any(map(lambda phone: phone[:2] in vowels,phones)):
-                    #find the final vowel sound in the word
-                    vowel_ind = np.where(map(lambda phone: phone[:2] in vowels,phones))[0][-1]
+rhyme_dict = lp.create_rhyme_dict()
 
-                    if not word in rhyme_dict[tuple(phones[vowel_ind:])]:
-                        rhyme_dict[tuple(phones[vowel_ind:])].append(word)
+scores = []
+for i in range(1000):
+    #Predict new word
+    hits = 0
+    for couplet in test_data:
+        #Last word of first line
+        test_x = couplet[0].split()[-1]
+        test_y = couplet[1].split()[-1]
+
+        #Take first pronuciation
+        phones = lp.arpabet[test_x][0]
+
+        #find the final vowel sound in the word
+        vowel_ind = np.where(map(lambda phone: phone[:2] in lp.vowels,phones))[0][-1]
+        phones_to_rhyme = phones[vowel_ind:]
+
+        poss_targets = rhyme_dict[tuple(phones_to_rhyme)]
+
+        yhat = np.random.choice(poss_targets)
+
+        if yhat == test_y:
+            hits += 1
+    scores.append(hits / float(len(test_data)))
+print np.mean(scores)
+print np.std(scores)
