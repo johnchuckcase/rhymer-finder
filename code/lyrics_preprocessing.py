@@ -7,6 +7,15 @@ import string
 from num2words import num2words
 from collections import defaultdict
 
+# Access Database and Table
+client = MongoClient()
+db = client['rap_db']
+tab = db['lyrics']
+
+#Get pronouncation dictionary
+arpabet = nltk.corpus.cmudict.dict()
+vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
+
 #Change numbers into words
 def spell_out_num(st):
     st = st.group(0) #Expects a regex return object
@@ -25,11 +34,22 @@ def lyrics2words(lyrics):
     lyrics = lyrics.translate(dict.fromkeys(map(ord, string.punctuation))) #unicode translate out punctuation
     return lyrics.split()
 
+def doTheyRhyme(word1,word2):
+    try:
+        phones1, phones2 = arpabet[word1], arpabet[word2]
+    except:
+        return False
+    #They rhyme if the last vowel phoneme and all subsequent phonemes match
+    for phone1 in phones1:
+        for phone2 in phones2:
+            vowel_ind1 = np.where(map(lambda phone: phone[:2] in vowels,phone1))[0][-1]
+            vowel_ind2 = np.where(map(lambda phone: phone[:2] in vowels,phone2))[0][-1]
+            if phone1[vowel_ind1:] == phone2[vowel_ind2:]:
+                return True
+    return False
+
+
 def create_rhyme_dict(artist = None):
-    # Access Database and Table
-    client = MongoClient()
-    db = client['rap_db']
-    tab = db['lyrics']
 
     #Retrieve all lyrics
     if artist: #If looking for specific artist
@@ -40,11 +60,6 @@ def create_rhyme_dict(artist = None):
     #Preprocess lyrics and return list of words
     word_list = map(lambda lyrics: lyrics2words(lyrics),corpus)
     words = set([word for song in word_list for word in song]) #flatten list of list
-
-    #Get pronouncation dictionary
-    arpabet = nltk.corpus.cmudict.dict()
-
-    vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
 
     rhyme_dict = defaultdict(list)
     for vowel in vowels:
