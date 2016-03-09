@@ -38,6 +38,13 @@ def preprocess_lyrics(lyrics):
 def lyrics2words(lyrics):
     return preprocess_lyrics(lyrics).split()
 
+def hasVowels(word):
+    print word
+    for pronounce in arpabet[word]:
+        if any(map(lambda phone: phone[:2] in vowels,pronounce)):
+            return True
+    return False
+
 #Return list of lists: each line has a list of its words
 def lyrics2lines(lyrics):
     lines = re.split('\n+',preprocess_lyrics(lyrics).replace('\r','').strip())
@@ -87,7 +94,7 @@ def create_rhyme_dict(artist = None):
                 #loop over all possible pronounications of word
                 for phones in arpabet[word]:
                     #if word has vowels
-                    if any(map(lambda phone: phone[:2] in vowels,phones)):
+                    if hasVowels(phones):
                         #find the final vowel sound in the word
                         vowel_ind = np.where(map(lambda phone: phone[:2] in vowels,phones))[0][-1]
 
