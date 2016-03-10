@@ -7,6 +7,7 @@ import string
 import random
 import lyrics_preprocessing as lp
 
+# 84.23.107.195:8080
 
 # Access Database and Table
 client = MongoClient()
@@ -16,57 +17,7 @@ tab = db['lyrics']
 #Retrieve all lyrics
 corpus = list(set([song['lyrics'] for song in tab.find()]))
 
-test_data = []
+rhyme_dict = lp.create_rhyme_dict(tab = tab, artist = None)
+test_data = lp.create_test_data(corpus)
 
-#Loop over every song
-for lyrics in corpus:
-    lyrics = lp.lyrics2lines(lyrics)
-
-    for i in range(len(lyrics)-1):
-        if not lyrics[i] or not lyrics[i+1]:
-            continue
-        word1 = lyrics[i][-1]
-        word2 = lyrics[i+1][-1]
-
-        #do the last words of this line and next line rhyme?
-        # if lp.doTheyRhyme(word1, word2) and not word1 == word2:
-            # test_data.append([' '.join(lyrics[i]),' '.join(lyrics[i+1])])
-        test_data.append([' '.join(lyrics[i]),' '.join(lyrics[i+1])])
-
-rhyme_dict = lp.create_rhyme_dict()
-
-scores = []
-for i in range(100):
-    #Predict new word
-    hits = 0
-    trys = 0
-    for couplet in test_data:
-
-        #Last word of first and second lines
-        test_x = couplet[0].split()[-1]
-        test_y = couplet[1].split()[-1]
-
-        #If unknown word or vowel-less
-        if not test_x in lp.arpabet or not lp.hasVowels(test_x):
-            continue
-
-        #Take first pronuciation
-        phones = lp.arpabet[test_x][0]
-
-        #find the final vowel sound in the word
-        vowel_ind = np.where(map(lambda phone: phone[:2] in lp.vowels,phones))[0][-1]
-        phones_to_rhyme = phones[vowel_ind:]
-
-        #Create list of possible rhymes based on rhyming_dictionary
-        poss_targets = rhyme_dict[tuple(phones_to_rhyme)]
-
-        #Choose a random word from possible rhymes
-        yhat = random.sample(poss_targets,1)[0]
-        trys += 1
-
-        if yhat == test_y:
-            hits += 1
-    #compute accuracy and append to list
-    scores.append(hits / float(len(test_data)))
-print np.mean(scores) #0.0065038 accuracy
-print np.std(scores)
+print lp.baseline_accuracy(test_data,rhyme_dict)
