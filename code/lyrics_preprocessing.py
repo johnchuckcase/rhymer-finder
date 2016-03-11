@@ -9,8 +9,6 @@ from text2num import text2num
 from collections import defaultdict, Counter
 import random
 
-
-
 #Get pronouncation dictionary
 arpabet = nltk.corpus.cmudict.dict()
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
@@ -44,6 +42,10 @@ def preprocess_lyrics(lyrics):
     # lyrics = space_out_numbers(lyrics)
     return lyrics
 
+#Deconstruct list of lists into one list
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
 def lyrics2words(lyrics):
     return preprocess_lyrics(lyrics).split()
 
@@ -53,10 +55,13 @@ def hasVowels(word):
             return True
     return False
 
-#Return list of lists: each line has a list of its words
+#Creates list of lines from string
 def lyrics2lines(lyrics):
-    lines = re.split('\n+',preprocess_lyrics(lyrics).replace('\r','').strip())
-    return [line.split() for line in lines]
+    return re.split('\n+',preprocess_lyrics(lyrics).replace('\r','').strip())
+
+#Creates list of lines from corpus (list of strings)
+def corpus2lines(corpus):
+    return flatten(map(lyrics2lines,corpus))
 
 def doTheyRhyme(word1,word2):
     try:
@@ -84,7 +89,7 @@ def create_test_data(corpus):
     test_data = []
     #Loop over every song
     for lyrics in corpus:
-        lyrics = lyrics2lines(lyrics)
+        lyrics = [line.split() for line in lyrics2lines(lyrics)]
 
         for i in range(len(lyrics)-1):
             if not lyrics[i] or not lyrics[i+1]:
