@@ -33,6 +33,7 @@ def spell_out_num(st):
 
 #Called by lyrics2words and lyrics2lines
 def preprocess_lyrics(lyrics):
+    lyrics = lyrics.strip()
     lyrics = re.sub('\[.*\]','',lyrics) #Get rid of block titles (e.g., [Verse 1], [Chorus])
     lyrics = re.sub('\(|\)','',lyrics)   #Get rid of words in parentheses
     lyrics = re.sub('[0-9]+',spell_out_num,lyrics) #Spell out numbers

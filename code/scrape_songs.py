@@ -60,53 +60,49 @@ np.random.shuffle(urls)
 
 #Loop over all songs for artist
 for i, url in enumerate(urls):
-    try:
-        print i, url
+    print i, url
 
-        # Go to the link and get the html as a string
-        headers = {"User-Agent":np.random.choice(user_agents)}
-        req = requests.get('http://www.azlyrics.com/' + url, headers=headers)
+    # Go to the link and get the html as a string
+    headers = {"User-Agent":np.random.choice(user_agents)}
+    req = requests.get('http://www.azlyrics.com/' + url, headers=headers)
 
-        # Feed the html to a BeatifulSoup object
-        soup = BeautifulSoup(req.content, 'lxml')
+    # Feed the html to a BeatifulSoup object
+    soup = BeautifulSoup(req.content, 'lxml')
 
-        #Lyrics from Webpage
-        rows = soup.find('div',{'class':'col-xs-12 col-lg-8 text-center'})
-        rows = rows.find('div',{'class':''})
-        lyrics = rows.text
+    #Lyrics from Webpage
+    rows = soup.find('div',{'class':'col-xs-12 col-lg-8 text-center'})
+    rows = rows.find('div',{'class':''})
+    lyrics = rows.text
 
-        #Strip trailing whitespaces and unicode madness
-        lyrics = lyrics.strip().encode('ascii','ignore')
+    #Strip trailing whitespaces and unicode madness
+    lyrics = lyrics.strip().encode('ascii','ignore')
 
-        #Get year / album from bottom of page
-        if soup.find('div',{'class':'panel album-panel noprint'}):
-            year_album = str(soup.find('div',{'class':'panel album-panel noprint'}).text.strip())
-            album = year_album.split('"')[1]
-            year = year_album.split('"')[2].strip().translate(None,'()')
-        else:
-            album = ''
-            year = ''
+    #Get year / album from bottom of page
+    if soup.find('div',{'class':'panel album-panel noprint'}):
+        year_album = str(soup.find('div',{'class':'panel album-panel noprint'}).text.strip())
+        album = year_album.split('"')[1]
+        year = year_album.split('"')[2].strip().translate(None,'()')
+    else:
+        album = ''
+        year = ''
 
-        #Get Song and Artist Name from URL
-        song = re.split('\.|/',url)[-2]
-        artist = url.split('/')[2]
-        artist_dir = project_dir + '/data/html/' + artist
+    #Get Song and Artist Name from URL
+    song = re.split('\.|/',url)[-2]
+    artist = url.split('/')[2]
+    artist_dir = project_dir + '/data/html/' + artist
 
-        #Add lyrics and meta-info to database
-        tab.insert_one({'artist':artist, 'url':url, 'lyrics':lyrics, 'song':song, 'album':album, 'year':year})
+    #Add lyrics and meta-info to database
+    tab.insert_one({'artist':artist, 'url':url, 'lyrics':lyrics, 'song':song, 'album':album, 'year':year})
 
-        #Save raw html to file
-        with open(artist_dir + '/' + song + '.html','w') as home_f:
-            home_f.write(req.content.decode('utf-8').encode('ascii', 'ignore'))
+    #Save raw html to file
+    with open(artist_dir + '/' + song + '.html','w') as home_f:
+        home_f.write(req.content.decode('utf-8').encode('ascii', 'ignore'))
 
-        #Note that the url has been scraped
-        with open(project_dir + '/data/html/urls_already_scraped.txt','a') as urls_f:
-            urls_f.write("%s\n" % url)
+    #Note that the url has been scraped
+    with open(project_dir + '/data/html/urls_already_scraped.txt','a') as urls_f:
+        urls_f.write("%s\n" % url)
 
-        #Sleep a random amount of time between requests. Every 5, sleep more.
+    #Sleep a random amount of time between requests. Every 5, sleep more.
+    time.sleep(np.random.randint(20,30) + np.random.rand())
+    if i % 5 == 0:
         time.sleep(np.random.randint(20,30) + np.random.rand())
-        if i % 5 == 0:
-            time.sleep(np.random.randint(20,30) + np.random.rand())
-
-    except:
-        print("Error: " + artist + " - " + song)
