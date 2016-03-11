@@ -8,10 +8,17 @@ from num2words import num2words
 from text2num import text2num
 from collections import defaultdict, Counter
 import random
+from pos_predict import POS
 
 #Get pronouncation dictionary
 arpabet = nltk.corpus.cmudict.dict()
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
+
+class rhymer(object):
+    def __init__(self, artist = None):
+        self.rhyme_dict = {}
+        self.pos_dict = {}
+
 
 #Change numbers into words
 def spell_out_num(st):
@@ -106,11 +113,7 @@ def create_test_data(corpus):
 
 def create_rhyme_dict(tab, artist = None):
 
-    #Retrieve all lyrics
-    if artist: #If looking for specific artist
-        corpus = list(set([song['lyrics'] for song in tab.find({'artist':artist})]))
-    else: #Return all artists
-        corpus = list(set([song['lyrics'] for song in tab.find()]))
+
 
     #Preprocess lyrics and return list of words
     word_list = map(lambda lyrics: lyrics2words(lyrics),corpus)
@@ -119,36 +122,40 @@ def create_rhyme_dict(tab, artist = None):
     rhyme_dict = defaultdict(set)
     unknown = 0
     for word in words:
-
         #If word is unknown, try to figure out pronounciation
-        # if not word in arpabet:
-            # try_update_arpabet(word)
-
+        if not word in arpabet:
+            try_update_arpabet(word)
         # if known word and >= pronounciation has a vowel
         if word in arpabet and hasVowels(word):
-
             #loop over all possible pronounications of word
             for phones in arpabet[word]:
-
                 #If this pronounciation has a vowel
                 if any(map(lambda phon: phon[:2] in vowels,phones)):
-
                     #find the final vowel sound in the word
                     vowel_ind = np.where(map(lambda phone: phone[:2] in vowels,phones))[0][-1]
-
                     #Append word to rhyming dictionary
                     rhyme_dict[tuple(phones[vowel_ind:])].update([word])
     return rhyme_dict
 
+def create_rhyme_dict(tab, artist = None):
+
+    #Retrieve all lyrics
+    if artist: #If looking for specific artist
+        corpus = list(set([song['lyrics'] for song in tab.find({'artist':artist})]))
+    else: #Return all artists
+        corpus = list(set([song['lyrics'] for song in tab.find()]))
+
 def baseline_accuracy(test_data,rhyme_dict):
     scores = []
     best_poss_scores = []
-    for i in range(10):
+    pos_model = POS(load_old = True)
+    for i in range(1):
         #Predict new word
         hits = 0
         poss_hits = 0
         trys = 0
-        for couplet in test_data:
+        np.random.shuffle(test_data)
+        for i_coup, couplet in enumerate(test_data):
 
             #Last word of first and second lines
             test_x = couplet[0].split()[-1]
@@ -166,7 +173,20 @@ def baseline_accuracy(test_data,rhyme_dict):
             phones_to_rhyme = phones[vowel_ind:]
 
             #Create list of possible rhymes based on rhyming_dictionary
-            poss_targets = rhyme_dict[tuple(phones_to_rhyme)]
+            poss_targets = np.array(list(rhyme_dict[tuple(phones_to_rhyme)]))
+
+            #Use part of speech to narrow down
+            pred_POS = pos_model.predict(pos_model.transform([couplet[1]]).drop('label',axis=1).values)
+            line_pos = [token.pos_ for token in pos_model.parser(' '.join(poss_targets))]
+
+            if len(poss_targets) == len(line_pos):
+                if pred_POS in line_pos:
+                    poss_targets = poss_targets[line_pos == pred_POS]
+            else:
+                print i_coup, phones_to_rhyme
+
+            if i_coup > 10000:
+                break
 
             #PREDICT
             #Choose a random word from possible rhymes

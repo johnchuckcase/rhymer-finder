@@ -18,6 +18,7 @@ tab = db['lyrics']
 corpus = list(set([song['lyrics'] for song in tab.find()]))
 
 rhyme_dict = lp.create_rhyme_dict(tab = tab, artist = None)
+pos_dict = lp.create_pos_dict(tab = tab, artist = None)
 test_data = lp.create_test_data(corpus)
 
 print lp.baseline_accuracy(test_data,rhyme_dict)

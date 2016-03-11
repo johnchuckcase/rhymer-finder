@@ -31,7 +31,7 @@ class POS(object):
         df = pd.DataFrame(columns = cols)
         ind = 0
         for i in range(min(len(lines),100000)):
-            if i % 10000 == 0:
+            if i+10 % 10000 == 0:
                 print i
             #Create list containing part of speeches for each word
             line_pos = [token.pos_ for token in self.parser(lines[i])]
