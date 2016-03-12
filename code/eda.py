@@ -5,7 +5,7 @@ import re
 import nltk
 import string
 import random
-import lyrics_preprocessing as lp
+import rhymer_finder
 
 # 84.23.107.195:8080
 
@@ -17,8 +17,8 @@ tab = db['lyrics']
 #Retrieve all lyrics
 corpus = list(set([song['lyrics'] for song in tab.find()]))
 
-rhyme_dict = lp.create_rhyme_dict(tab = tab, artist = None)
-pos_dict = lp.create_pos_dict(tab = tab, artist = None)
-test_data = lp.create_test_data(corpus)
+rhymer = rhymer_finder.rhymer_finder()
+rhymer.process_corpus(corpus)
+test_data = rhymer.create_test_data(corpus)
 
-print lp.baseline_accuracy(test_data,rhyme_dict)
+print rhymer.baseline_accuracy(test_data)

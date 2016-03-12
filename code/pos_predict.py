@@ -82,7 +82,6 @@ class POS(object):
     def predict(self, X):
         return self.model.predict(X)
 
-
     def savemodel(self):
         with open(project_dir + '/data/POS_model.pkl', 'w') as f:
             pickle.dump(self.model, f)
