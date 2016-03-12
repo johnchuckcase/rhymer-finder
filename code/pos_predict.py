@@ -78,7 +78,6 @@ class POS(object):
         print "Fitting"
         self.model.fit(X,y)
 
-
     def predict(self, X):
         return self.model.predict(X)
 
