@@ -1,6 +1,9 @@
 import re
 from num2words import num2words
 import string
+import cPickle as pickle
+from nltk.corpus import stopwords
+import numpy as np
 
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
 
@@ -45,3 +48,9 @@ def spell_out_num(st):
         return num2words(num).replace('-',' ')
     else:
         return st #Deal with 'one thousand, nine hundred and ninety-nine' cases later
+
+#Find the average vector for a list of words ("line")
+def avg_vec(line,w2v_model):
+    stop = stopwords.words('english')
+    line = filter(lambda word: word not in stop and word in w2v_model,line)
+    return reduce(lambda x,y: x+y,map(lambda word: w2v_model[word],line),np.zeros(w2v_model['the'].shape)) / len(line)

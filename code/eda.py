@@ -21,4 +21,4 @@ rhymer = rhymer_finder.rhymer_finder()
 rhymer.process_corpus(corpus)
 test_data = rhymer.create_test_data(corpus)
 
-print rhymer.baseline_accuracy(test_data)
+print rhymer.accuracy(test_data)
