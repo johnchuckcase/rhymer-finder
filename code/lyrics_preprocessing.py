@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 import numpy as np
 
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IH','IY','OW','OY','UH','UW']
+stop = stopwords.words('english')
 
 #Called by lyrics2words and lyrics2lines
 def preprocess_lyrics(lyrics):
@@ -51,6 +52,18 @@ def spell_out_num(st):
 
 #Find the average vector for a list of words ("line")
 def avg_vec(line,w2v_model):
-    stop = stopwords.words('english')
     line = filter(lambda word: word not in stop and word in w2v_model,line)
-    return reduce(lambda x,y: x+y,map(lambda word: w2v_model[word],line),np.zeros(w2v_model['the'].shape)) / len(line)
+
+    vec_sum = np.zeros(w2v_model['the'].shape)
+    for i, word in enumerate(line):
+        vec_sum += np.exp(i) * w2v_model[word]
+    return vec_sum / len(line)
+
+    # map(lambda word: w2v_model[word],line)
+    # return reduce(lambda x,y: x+y,map(lambda word: w2v_model[word],line),np.zeros(w2v_model['the'].shape)) / len(line)
+
+def cosine_sim(x,y):
+    prod = np.dot(x, y)
+    len1 = np.dot(x, x) ** 0.5
+    len2 = np.dot(y, y) ** 0.5
+    return prod / (len1 * len2)
