@@ -19,7 +19,8 @@ $(document).ready(function() {
 
           $.ajax({
           	type: 'GET',
-          	url: '/rhyme'
+          	url: '/rhyme',
+            data: {word_to_rhyme: word_to_rhyme}
           })
           .success( function(response) {
           	// empty the place where you are displaying rhyming words

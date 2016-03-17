@@ -1,25 +1,30 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from datetime import date
 from pymongo import MongoClient
 import rhymer_finder
-
+import os
+import cPickle as pickle
 app = Flask(__name__)
 
-# Access Database and Table
-client = MongoClient()
-db = client['rap_db']
-tab = db['lyrics']
 
-#Retrieve all lyrics
-corpus = list(set([song['lyrics'] for song in tab.find()]))
+#Find parent directory of this script
+project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-rhymer = rhymer_finder.rhymer_finder()
-rhymer.process_corpus(corpus)
+
+print "Loading Rhyming / POS Dictionary"
+with open(project_dir + '/data/rhymer.pkl','r') as f:
+    rhymer = pickle.load(f) #Rhyming dictionary / POS dictionary
+
+print "Loading W2V"
+with open(project_dir + '/data/w2v_all.pkl','r') as f:
+    rhymer.load_w2v(pickle.load(f))
+
+print "Ready"
 
 # home page
 @app.route('/')
 def index():
-    print rhymer
+    print rhymer.find_rhyme(['too legit to quit',''])
     return '''<script   src="https://code.jquery.com/jquery-1.12.1.min.js"   integrity="sha256-I1nTg78tSrZev3kjvfdM5A5Ak/blglGzlaZANLPDl3I="   crossorigin="anonymous"></script>
     <link rel='stylesheet' href='static/stylesheet.css'>
     <script src='static/shcriptsh.js'></script>
@@ -30,7 +35,11 @@ def index():
 
 @app.route('/rhyme', methods=["GET"])
 def rhyme():
-    return '''RAWR'''
+    word_to_rhyme = request.args.get('word_to_rhyme', 0, type=str)
+    print word_to_rhyme
+    print word_to_rhyme
+    print word_to_rhyme
+    return jsonify(rhymer.find_rhyme(['too legit to quit','']))
 
 
 
