@@ -24,24 +24,26 @@ print "Ready"
 # home page
 @app.route('/')
 def index():
-    print rhymer.find_rhyme(['too legit to quit',''])
     return '''<script   src="https://code.jquery.com/jquery-1.12.1.min.js"   integrity="sha256-I1nTg78tSrZev3kjvfdM5A5Ak/blglGzlaZANLPDl3I="   crossorigin="anonymous"></script>
     <link rel='stylesheet' href='static/stylesheet.css'>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
     <script src='static/shcriptsh.js'></script>
-    <form>
-  Line 1<br>
-  <input type="text" id="lyric-input" name="line1">Lyric</input><br>
-</form><div id='block-space'></div><div id='rhymes-space'></div>'''
+    <br>
+    <center>
+    <form class="pure-form">
+    <input type="email" id="lyric-input" placeholder="Enter Lyrics" size="50">
+    </form>
+    <div id='block-space'></div>
+    <div id='rhymes-space'></div>
+    </center>'''
 
 @app.route('/rhyme', methods=["GET"])
 def rhyme():
+
     word_to_rhyme = request.args.get('word_to_rhyme', 0, type=str)
-    print word_to_rhyme
-    print word_to_rhyme
-    print word_to_rhyme
-    return jsonify(rhymer.find_rhyme(['too legit to quit','']))
+    words = request.args.get('words',type=str).split(',')
 
-
+    return jsonify(rhymer.find_rhyme(word_to_rhyme.lower(), words))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

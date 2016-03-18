@@ -56,7 +56,7 @@ def avg_vec(line,w2v_model):
 
     vec_sum = np.zeros(w2v_model['the'].shape)
     for i, word in enumerate(line):
-        vec_sum += w2v_model[word] * np.exp(i)
+        vec_sum += w2v_model[word] #* np.exp(i)
     return vec_sum / len(line)
 
     # map(lambda word: w2v_model[word],line)
