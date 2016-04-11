@@ -231,10 +231,6 @@ class rhymer_finder(object):
         line_vec = lp.avg_vec(word_list,self.w2v_model)
         poss_targets = np.array(filter(lambda word: word in self.w2v_model, poss_targets))
 
-        #Keep only likely words given the predicted POS
-        pred_POS = [token.pos_ for token in parser(unicode(' '.join(word_list) + ' xxx'))][-1]
-        poss_targets = np.array([word for word in poss_targets if self.pos_dict[word][pred_POS] > 0.5])
-
         sims = map(lambda word: lp.cosine_sim(line_vec,self.w2v_model[word]),poss_targets)
         sims = np.array(map(lambda num: round(num,2),sims))
         sorted_inds = np.argsort(sims)[::-1]

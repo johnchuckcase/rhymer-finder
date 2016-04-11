@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from datetime import date
 from pymongo import MongoClient
 import rhymer_finder
@@ -17,29 +17,31 @@ with open(project_dir + '/data/rhymer.pkl','r') as f:
     rhymer = pickle.load(f) #Rhyming dictionary / POS dictionary
 
 print "Loading W2V"
-with open(project_dir + '/data/w2v_all.pkl','r') as f:
+with open(project_dir + '/data/w2v.pkl','r') as f:
     rhymer.load_w2v(pickle.load(f))
 
 print "Ready"
 
 # home page
 @app.route('/')
+# def index():
+#     return '''<script   src="https://code.jquery.com/jquery-1.12.1.min.js"   integrity="sha256-I1nTg78tSrZev3kjvfdM5A5Ak/blglGzlaZANLPDl3I="   crossorigin="anonymous"></script>
+#     <link rel='stylesheet' href='static/stylesheet.css'>
+#     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+#     <script src='static/shcriptsh.js'></script>
+#     <br>
+#     <center>
+#     <div id='input-div'>
+#     <form class="pure-form" style="display: inline">
+#     <input type="email" id="lyric-input" placeholder="Enter Lyrics" class="input-form";
+# " size=50>
+#
+#     </div>
+#     <div id='block-space'></div>
+#     <div id='rhymes-space'></div>
+#     </center>'''
 def index():
-    return '''<script   src="https://code.jquery.com/jquery-1.12.1.min.js"   integrity="sha256-I1nTg78tSrZev3kjvfdM5A5Ak/blglGzlaZANLPDl3I="   crossorigin="anonymous"></script>
-    <link rel='stylesheet' href='static/stylesheet.css'>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
-    <script src='static/shcriptsh.js'></script>
-    <br>
-    <center>
-    <div id='input-div'>
-    <form class="pure-form" style="display: inline">
-    <input type="email" id="lyric-input" placeholder="Enter Lyrics" class="input-form";
-" size=50>
-
-    </div>
-    <div id='block-space'></div>
-    <div id='rhymes-space'></div>
-    </center>'''
+     return render_template('rhymerfinder.html',name=None)
 
 #</form><div class="plus-btn" style="display: inline">+</div>
 
@@ -52,4 +54,4 @@ def rhyme():
     return jsonify(rhymer.find_rhyme(word_to_rhyme.lower(), words))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=5050, debug=True)

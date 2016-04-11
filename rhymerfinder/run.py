@@ -10,29 +10,37 @@ import rhymer_finder
 import cPickle as pickle
 import os
 
-#Load Mongo Database
-client = MongoClient()
-target_collection = client.rap_db.lyrics
-with open('../data/lyrics.bson', 'rb') as f:
-    target_collection.insert(decode_all(f.read()))
-
-# Access Database and Table
-db = client['rap_db']
-tab = db['lyrics']
-
 project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-#Retrieve all lyrics
-corpus = list(set([song['lyrics'] for song in tab.find()]))
+print "Loading Corpus..."
+#LOAD Corpus from BSON
+# client = MongoClient()
+# target_collection = client.rap_db_new.lyrics
+# with open('../data/lyrics.bson', 'rb') as f:
+#     target_collection.insert(decode_all(f.read()))
 
+#Load Corpus from MongoDB
+# Access Database and Table
+# db = client['rap_db']
+# tab = db['lyrics']
+#corpus = list(set([song['lyrics'] for song in tab.find()]))
+
+#Load Corpus from pickle
+with open(project_dir + '/data/corpus.pkl','r') as f:
+    corpus = pickle.load(f)
+
+
+print "Loading W2V..."
+with open(project_dir + '/data/w2v.pkl','r') as f:
+    rhymer.load_w2v(pickle.load(f))
+
+#Initialize rhymer_finder object
 rhymer = rhymer_finder.rhymer_finder()
 
 print "Creating Rhyming Dictionary..."
 rhymer.process_corpus(corpus)
 
-print "Loading W2V..."
-with open(project_dir + '/data/w2v.pkl','r') as f:
-    rhymer.load_w2v(pickle.load(f))
+
 
 print "Creating Test Data..."
 test_data = rhymer.create_test_data(corpus)

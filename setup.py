@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 import sys
 from setuptools import setup, Command
@@ -18,5 +16,5 @@ setup(
     url = "https://github.com/johnchuckcase/RhymerFinder",
     packages=['RhymerFinder'],
     include_package_data=True,
-    install_requires = install_requires,
+    install_requires = install_requires
 )

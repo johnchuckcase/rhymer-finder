@@ -1,5 +1,6 @@
 pandas
 numpy
+num2word
 nltk
 gensim
 pymongo
