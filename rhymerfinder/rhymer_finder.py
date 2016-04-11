@@ -175,7 +175,9 @@ class rhymer_finder(object):
             scores.append(hits / float(len(test_data)))
             scores_bl.append(hits_bl / float(len(test_data)))
             best_poss_scores.append(poss_hits / float(len(test_data)))
-        return np.mean(scores), np.mean(scores_bl), np.mean(best_poss_scores) #0.0065038 accuracy
+        print "RhymerFinder Accuracy:", np.mean(scores)
+        print "Baseline Accuracy:", np.mean(scores_bl)
+        print "Greatest Possible Accuracy:", np.mean(best_poss_scores) #0.0065038 accuracy
 
     #If word is not in arpabet, try to figure out if it can be tweaked
     def try_update_arpabet(self,word):
