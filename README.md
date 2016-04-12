@@ -1,8 +1,8 @@
 # RhymerFinder
 RhymerFinder predicts the rhymes in a song based on preceding lyrics by using gensim's Word2Vec implementation.
 
-#[Blog Post](http://johnchuckcase.com/rhymerfinder/)
-#[Web App](http://rhymerfinder.com/)
+* [Blog Post](http://johnchuckcase.com/rhymerfinder/) 
+* [Web App (RhymerFinder.com)](http://rhymerfinder.com/)
 
 ##Installation
 `python setup.py install`
