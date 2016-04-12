@@ -25,7 +25,7 @@ To scrape the HTML source, parse the lyrics, and store them using MongoDB (HTML 
 ##Rhyme Your Own Lyrics
 You can also use RhymerFinder to rhyme your own lyrics at the iPython command line (replicating the behavior of [rhymerfinder.com](https://www.rhymerfinder.com)).
 
-First, train a rhymerfinder object:
+First, cd into the "rhymerfinder" subdirectory". Train a rhymerfinder object with the following:
 ```
 import rhymer_finder
 import cPickle as pickle
