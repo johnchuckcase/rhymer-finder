@@ -198,14 +198,8 @@ class rhymer_finder(object):
         elif re.findall(r'(.)\1+\b',word) and re.sub(r'(.)\1+\b',r'\1',word) in self.arpabet:
             self.arpabet.update( {word : re.sub(r'(.)\1+\b',r'\1',word)} )
 
-    def find_rhyme_couplet(self,couplet):
-
-        #Last word of first and second lines
-        word_to_rhyme = couplet[0].split()[-1]
-        word_list = (couplet[0] + ' ' +couplet[1]).split()
-        return self.find_rhyme(word_to_rhyme, word_list)
-
-    def find_rhyme(self,word_to_rhyme, word_list):
+    #To replicate the web app RhymerFinder.com
+    def find_rhyme(self,lyrics,word_to_rhyme):
 
         #If unknown word or vowel-less
         if not word_to_rhyme in self.arpabet or not lp.hasVowels(word_to_rhyme,self.arpabet):
@@ -228,6 +222,7 @@ class rhymer_finder(object):
             return None
 
         #Find the average W2V vector over all words
+        word_list = lyrics.split()
         line_vec = lp.avg_vec(word_list,self.w2v_model)
         poss_targets = np.array(filter(lambda word: word in self.w2v_model, poss_targets))
 
@@ -236,4 +231,4 @@ class rhymer_finder(object):
         sorted_inds = np.argsort(sims)[::-1]
 
         # print pd.DataFrame({"Rhymes" : poss_targets[sorted_inds], "Cos-sim" : sims[sorted_inds]})
-        return {"Rhymes" : list(poss_targets[sorted_inds]), "Cos-sim" : list(sims[sorted_inds])}
+        return pd.DataFrame({"Rhymes" : list(poss_targets[sorted_inds]), "Cos-sim" : list(sims[sorted_inds])})

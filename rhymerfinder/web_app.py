@@ -11,10 +11,13 @@ logging.info("Print works")
 #Find parent directory of this script
 project_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
+print "Loading Corpus"
+with open(project_dir + '/data/corpus.pkl','r') as f:
+    corpus = pickle.load(f)
 
-print "Loading Rhyming / POS Dictionary"
-with open(project_dir + '/data/rhymer.pkl','r') as f:
-    rhymer = pickle.load(f) #Rhyming dictionary / POS dictionary
+print "Loading Rhyming Dictionary"
+rhymer = rhymer_finder.rhymer_finder()
+rhymer.process_corpus(corpus)
 
 print "Loading W2V"
 with open(project_dir + '/data/w2v.pkl','r') as f:
@@ -43,7 +46,6 @@ print "Ready"
 def index():
      return render_template('rhymerfinder.html',name=None)
 
-#</form><div class="plus-btn" style="display: inline">+</div>
 
 @app.route('/rhyme', methods=["GET"])
 def rhyme():
