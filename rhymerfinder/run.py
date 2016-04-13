@@ -29,13 +29,14 @@ print "Loading Corpus..."
 with open(project_dir + '/data/corpus.pkl','r') as f:
     corpus = pickle.load(f)
 
+#Initialize rhymer_finder object
+rhymer = rhymer_finder.rhymer_finder()
 
 print "Loading W2V..."
 with open(project_dir + '/data/w2v.pkl','r') as f:
     rhymer.load_w2v(pickle.load(f))
 
-#Initialize rhymer_finder object
-rhymer = rhymer_finder.rhymer_finder()
+
 
 print "Creating Rhyming Dictionary..."
 rhymer.process_corpus(corpus)
