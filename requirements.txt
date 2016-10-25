@@ -1,6 +1,6 @@
 pandas
 numpy
-num2word
+num2words
 nltk
 gensim
 pymongo
