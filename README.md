@@ -4,13 +4,13 @@ RhymerFinder predicts the rhymes in a song based on preceding lyrics by using ge
 * [Blog Post](http://johnchuckcase.com/rhymerfinder/) 
 * [Web App (RhymerFinder.com)](http://rhymerfinder.com/)
 
-##Installation
+## Installation
 `python setup.py install`
 
-##Accuracy Metrics
+## Accuracy Metrics
 `python rhymerfinder/run.py`
 
-##Scraping
+## Scraping
 The lyrics corpus is provided in data/corpus.pkl.
 However, if you would like to re-scrape the lyrics into a Mongo database run the following:
 
@@ -22,7 +22,7 @@ To scrape the HTML source, parse the lyrics, and store them using MongoDB (HTML 
 
 ```python rhymerfinder/scrape_songs.py```
 
-##Rhyme Your Own Lyrics
+## Rhyme Your Own Lyrics
 You can also use RhymerFinder to rhyme your own lyrics at the iPython command line (replicating the behavior of [rhymerfinder.com](https://www.rhymerfinder.com)).
 
 First, cd into the "rhymerfinder" subdirectory". Train a rhymerfinder object with the following:
