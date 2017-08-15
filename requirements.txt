@@ -1,5 +1,5 @@
 pandas==0.18.0
-numpy==0.5.5
+numpy==1.13.1
 num2words==0.5.5
 nltk==3.2
 gensim==0.12.4
