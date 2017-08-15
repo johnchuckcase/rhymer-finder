@@ -222,7 +222,7 @@ class rhymer_finder(object):
             return None
 
         #Find the average W2V vector over all words
-        word_list = lyrics.split()
+        word_list = lyrics
         line_vec = lp.avg_vec(word_list,self.w2v_model)
         poss_targets = np.array(filter(lambda word: word in self.w2v_model, poss_targets))
 
